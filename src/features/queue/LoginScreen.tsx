@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   ArrowLeft,
   ArrowRight,
@@ -10,13 +10,21 @@ import {
   EyeOff,
   GraduationCap,
   KeyRound,
+  Loader2,
   LockKeyhole,
   Mail,
   ShieldCheck,
   Users,
 } from 'lucide-react'
-import { DEMO_USERS } from './data'
+import { apiFetch } from './api'
+import { DEMO_ACCOUNTS } from './constants'
 import type { User } from './types'
+
+const LOADING_STEPS = [
+  'Проверяем учётную запись…',
+  'Загружаем профиль деканата…',
+  'Подготавливаем очередь…',
+]
 
 export function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
   const [view, setView] = useState<'login' | 'reset' | 'sent'>('login')
@@ -24,22 +32,40 @@ export function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [loadingStep, setLoadingStep] = useState(0)
 
-  const signIn = (event: React.FormEvent) => {
+  useEffect(() => {
+    if (!loading) return
+    const timer = window.setInterval(
+      () => setLoadingStep((s) => (s + 1) % LOADING_STEPS.length),
+      600,
+    )
+    return () => window.clearInterval(timer)
+  }, [loading])
+
+  const signIn = async (event: React.FormEvent) => {
     event.preventDefault()
-    const account = DEMO_USERS[email.trim().toLowerCase()]
-    if (!account || account.password !== password) {
-      setError('Проверьте почту и пароль или выберите демо-аккаунт ниже.')
-      return
-    }
     setError('')
-    const { password: _, ...user } = account
-    onLogin(user)
+    setLoading(true)
+    setLoadingStep(0)
+    try {
+      const { user } = await apiFetch<{ user: User }>('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password }),
+      })
+      onLogin(user)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Ошибка входа')
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const chooseDemo = (demoEmail: string) => {
-    setEmail(demoEmail)
-    setPassword(DEMO_USERS[demoEmail].password)
+  const chooseDemo = (acc: (typeof DEMO_ACCOUNTS)[number]) => {
+    setEmail(acc.email)
+    setPassword(acc.password)
+    setShowPassword(false)
     setError('')
   }
 
@@ -108,6 +134,7 @@ export function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
                   Используйте корпоративную почту университета.
                 </p>
               </div>
+
               <form className="mt-8 space-y-5" onSubmit={signIn}>
                 <label className="block">
                   <span className="mb-2 block text-xs font-bold text-slate-700">Почта</span>
@@ -123,6 +150,7 @@ export function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
                     />
                   </span>
                 </label>
+
                 <label className="block">
                   <span className="mb-2 block text-xs font-bold text-slate-700">Пароль</span>
                   <span className="relative block">
@@ -145,6 +173,7 @@ export function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
                     </button>
                   </span>
                 </label>
+
                 <div className="flex justify-end">
                   <button
                     type="button"
@@ -154,40 +183,56 @@ export function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
                     Забыли пароль?
                   </button>
                 </div>
+
                 {error && (
                   <p className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-medium text-rose-700">
                     {error}
                   </p>
                 )}
-                <button className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#0F172A] text-sm font-bold text-white shadow-lg shadow-slate-900/15 transition hover:bg-slate-800">
-                  Войти в систему <ArrowRight className="size-4" />
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#0F172A] text-sm font-bold text-white shadow-lg shadow-slate-900/15 transition hover:bg-slate-800 disabled:cursor-wait disabled:opacity-80"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin" /> {LOADING_STEPS[loadingStep]}
+                    </>
+                  ) : (
+                    <>
+                      Войти в систему <ArrowRight className="size-4" />
+                    </>
+                  )}
                 </button>
               </form>
+
               <div className="mt-7 border-t border-slate-100 pt-6">
                 <p className="mb-3 text-[11px] font-bold uppercase tracking-wider text-slate-400">
                   Демо-доступ
                 </p>
                 <div className="grid gap-2 sm:grid-cols-2">
-                  <button
-                    onClick={() => chooseDemo('student@university.kz')}
-                    className="rounded-xl border border-slate-200 p-3 text-left transition hover:border-sky-300 hover:bg-sky-50"
-                  >
-                    <span className="block text-xs font-bold text-slate-800">Студент</span>
-                    <span className="text-[10px] text-slate-500">student@university.kz</span>
-                  </button>
-                  <button
-                    onClick={() => chooseDemo('teacher@university.kz')}
-                    className="rounded-xl border border-slate-200 p-3 text-left transition hover:border-indigo-300 hover:bg-indigo-50"
-                  >
-                    <span className="block text-xs font-bold text-slate-800">Преподаватель</span>
-                    <span className="text-[10px] text-slate-500">teacher@university.kz</span>
-                  </button>
+                  {DEMO_ACCOUNTS.map((acc) => (
+                    <button
+                      key={acc.email}
+                      type="button"
+                      onClick={() => chooseDemo(acc)}
+                      className="rounded-xl border border-slate-200 p-3 text-left transition hover:border-sky-300 hover:bg-sky-50"
+                    >
+                      <span className="block text-xs font-bold text-slate-800">{acc.label}</span>
+                      <span className="text-[10px] text-slate-500">{acc.email}</span>
+                    </button>
+                  ))}
                 </div>
+                <p className="mt-3 text-[10px] text-slate-400">
+                  Нажмите на карточку, чтобы подставить почту и пароль, затем «Войти в систему».
+                </p>
               </div>
             </>
           ) : view === 'reset' ? (
             <div>
               <button
+                type="button"
                 onClick={() => setView('login')}
                 className="mb-8 flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-slate-900"
               >
@@ -210,19 +255,19 @@ export function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
               >
                 <label className="block">
                   <span className="mb-2 block text-xs font-bold text-slate-700">Почта</span>
-                  <span className="relative block">
-                    <Mail className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
-                    <input
-                      type="email"
-                      required
-                      value={email}
-                      onChange={(event) => setEmail(event.target.value)}
-                      placeholder="name@university.kz"
-                      className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm outline-none focus:border-slate-900"
-                    />
-                  </span>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    placeholder="name@university.kz"
+                    className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm outline-none focus:border-slate-900"
+                  />
                 </label>
-                <button className="h-12 w-full rounded-xl bg-[#0F172A] text-sm font-bold text-white">
+                <button
+                  type="submit"
+                  className="h-12 w-full rounded-xl bg-[#0F172A] text-sm font-bold text-white"
+                >
                   Отправить инструкцию
                 </button>
               </form>
@@ -238,6 +283,7 @@ export function LoginScreen({ onLogin }: { onLogin: (user: User) => void }) {
                 сымитировано.
               </p>
               <button
+                type="button"
                 onClick={() => setView('login')}
                 className="mt-8 inline-flex h-11 items-center gap-2 rounded-xl bg-[#0F172A] px-6 text-sm font-bold text-white"
               >

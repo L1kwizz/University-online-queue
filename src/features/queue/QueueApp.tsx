@@ -1,27 +1,57 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { BellRing, Building2, X } from 'lucide-react'
+import { apiFetch } from './api'
 import { AppHeader } from './AppHeader'
 import { playQueueChime } from './audio'
-import { INITIAL_TICKETS, WINDOWS } from './data'
 import { LoginScreen } from './LoginScreen'
 import { PublicBoard } from './PublicBoard'
 import { StaffDashboard } from './StaffDashboard'
 import { StudentDashboard } from './StudentDashboard'
-import type { Direction, QueueTicket, User } from './types'
+import type { CounterWindow, Direction, QueueTicket, User } from './types'
+
+type Snapshot = { tickets: QueueTicket[]; windows: CounterWindow[] }
 
 export function QueueApp() {
   const [user, setUser] = useState<User | null>(null)
-  const [tickets, setTickets] = useState<QueueTicket[]>(INITIAL_TICKETS)
+  const [ready, setReady] = useState(false)
+  const [snapshot, setSnapshot] = useState<Snapshot>({ tickets: [], windows: [] })
   const [soundEnabled, setSoundEnabled] = useState(true)
   const [boardOpen, setBoardOpen] = useState(false)
   const [noticeDismissed, setNoticeDismissed] = useState(false)
+  const [actionError, setActionError] = useState('')
   const previousCalledId = useRef<string | null>(null)
+
+  const { tickets, windows } = snapshot
+
+  // Восстанавливаем сессию при загрузке страницы
+  useEffect(() => {
+    apiFetch<{ user: User }>('/auth/me')
+      .then((r) => setUser(r.user))
+      .catch(() => setUser(null))
+      .finally(() => setReady(true))
+  }, [])
+
+  const refresh = useCallback(async () => {
+    try {
+      setSnapshot(await apiFetch<Snapshot>('/tickets'))
+    } catch {
+      /* сессия истекла или сеть недоступна: оставляем последние данные */
+    }
+  }, [])
+
+  // Обновление очереди каждые 4 секунды (позже можно заменить на SSE)
+  useEffect(() => {
+    if (!user) return
+    refresh()
+    const timer = window.setInterval(refresh, 4000)
+    return () => window.clearInterval(timer)
+  }, [user, refresh])
 
   const myCalledTicket =
     user?.role === 'student'
-      ? tickets.find((ticket) => ticket.studentEmail === user.email && ticket.status === 'called')
+      ? tickets.find((t) => t.studentId === user.id && t.status === 'called')
       : undefined
 
   useEffect(() => {
@@ -32,106 +62,94 @@ export function QueueApp() {
     }
   }, [myCalledTicket, soundEnabled])
 
+  const run = async (request: () => Promise<unknown>) => {
+    setActionError('')
+    try {
+      await request()
+      await refresh()
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : 'Ошибка')
+    }
+  }
+
+  const patchTicket = (id: string, action: string, extra: object = {}) =>
+    apiFetch(`/tickets/${id}`, { method: 'PATCH', body: JSON.stringify({ action, ...extra }) })
+
+  const logout = async () => {
+    await apiFetch('/auth/logout', { method: 'POST' }).catch(() => {})
+    setUser(null)
+    setSnapshot({ tickets: [], windows: [] })
+  }
+
+  if (!ready) {
+    return <div className="flex min-h-screen items-center justify-center text-sm text-slate-500">Загрузка…</div>
+  }
   if (!user) return <LoginScreen onLogin={setUser} />
 
-  const callTicket = (ticketId: string, windowId: number) => {
+  const callTicket = (ticketId: string, windowNumber: number) => {
+    const window = windows.find((w) => w.id === windowNumber)
+    if (!window) return
     if (soundEnabled) playQueueChime()
-    setTickets((current) =>
-      current.map((ticket) =>
-        ticket.id === ticketId ? { ...ticket, status: 'called', windowNumber: windowId } : ticket,
-      ),
-    )
+    run(() => patchTicket(ticketId, 'call', { counterId: window.dbId }))
   }
 
-  const callNext = (windowId: number) => {
-    const window = WINDOWS.find((item) => item.id === windowId)
-    const next =
-      tickets.find(
-        (ticket) => ticket.status === 'waiting' && window?.directions.includes(ticket.direction),
-      ) ?? tickets.find((ticket) => ticket.status === 'waiting')
-    if (next) callTicket(next.id, windowId)
+  const callNext = (windowNumber: number) => {
+    const window = windows.find((w) => w.id === windowNumber)
+    if (!window) return
+    if (soundEnabled) playQueueChime()
+    run(() => apiFetch(`/counters/${window.dbId}/call-next`, { method: 'POST' }))
   }
 
-  const updateStatus = (ticketId: string, status: QueueTicket['status']) =>
-    setTickets((current) =>
-      current.map((ticket) => (ticket.id === ticketId ? { ...ticket, status } : ticket)),
-    )
-
-  const createTicket = (direction: Direction, purpose: string) => {
-    const prefix = direction === 'tech' ? 'Т' : 'Г'
-    const base = direction === 'tech' ? 100 : 200
-    const count = tickets.filter((ticket) => ticket.direction === direction).length + 1
-    const now = new Date().toLocaleTimeString('ru-RU', {
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-    setTickets((current) => [
-      ...current,
-      {
-        id: `t-${Date.now()}`,
-        ticketNumber: `${prefix}-${base + count}`,
-        studentEmail: user.email,
-        studentName: user.name,
-        purpose,
-        direction,
-        createdAt: now,
-        status: 'waiting',
-      },
-    ])
-  }
+  const createTicket = (purpose: string) =>
+    run(() => apiFetch('/tickets', { method: 'POST', body: JSON.stringify({ purpose }) }))
 
   return (
     <div className="min-h-screen bg-[#f6f8fb] text-[#0F172A]">
       <AppHeader
         user={user}
         soundEnabled={soundEnabled}
-        onToggleSound={() => setSoundEnabled((value) => !value)}
+        onToggleSound={() => setSoundEnabled((v) => !v)}
         onBoard={() => setBoardOpen(true)}
-        onLogout={() => setUser(null)}
+        onLogout={logout}
       />
+
       <main className="mx-auto w-full max-w-[1440px] px-4 py-7 sm:px-6 lg:px-8">
+        {actionError && (
+          <p className="mb-5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-medium text-rose-700">
+            {actionError}
+          </p>
+        )}
         {user.role === 'student' ? (
           <StudentDashboard
             user={user}
             tickets={tickets}
             onCreate={createTicket}
-            onCancel={(id) => updateStatus(id, 'cancelled')}
+            onCancel={(id) => run(() => patchTicket(id, 'cancel'))}
           />
         ) : (
           <StaffDashboard
             tickets={tickets}
+            windows={windows}
             onCallNext={callNext}
             onAssign={callTicket}
-            onComplete={(id) => updateStatus(id, 'completed')}
-            onSkip={(id) => updateStatus(id, 'skipped')}
-            onTransfer={(id, direction) =>
-              setTickets((current) =>
-                current.map((ticket) =>
-                  ticket.id === id
-                    ? {
-                        ...ticket,
-                        direction,
-                        status: 'waiting',
-                        windowNumber: undefined,
-                      }
-                    : ticket,
-                ),
-              )
-            }
+            onComplete={(id) => run(() => patchTicket(id, 'complete'))}
+            onSkip={(id) => run(() => patchTicket(id, 'skip'))}
           />
         )}
       </main>
+
       <footer className="mt-12 border-t border-slate-200 bg-white py-6">
         <div className="mx-auto flex max-w-[1440px] flex-col justify-between gap-3 px-6 text-[10px] font-medium text-slate-400 sm:flex-row sm:items-center">
           <span className="flex items-center gap-2">
-            <Building2 className="size-3.5 text-slate-600" /> University Hub · Электронная очередь
-            деканата
+            <Building2 className="size-3.5 text-slate-600" /> {user.departmentName}
           </span>
-          <span>Демо-интерфейс · данные хранятся только до обновления страницы</span>
+          <span>University Hub · Электронная очередь</span>
         </div>
       </footer>
 
-      {boardOpen && <PublicBoard tickets={tickets} onClose={() => setBoardOpen(false)} />}
+      {boardOpen && (
+        <PublicBoard tickets={tickets} windows={windows} onClose={() => setBoardOpen(false)} />
+      )}
 
       {myCalledTicket && !noticeDismissed && (
         <div className="fixed bottom-5 right-5 z-50 w-[calc(100%-2.5rem)] max-w-md overflow-hidden rounded-2xl border border-emerald-300 bg-white shadow-2xl shadow-emerald-900/20">

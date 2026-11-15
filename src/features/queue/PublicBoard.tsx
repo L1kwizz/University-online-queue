@@ -1,12 +1,20 @@
 'use client'
 
 import { Monitor, Volume2, X } from 'lucide-react'
-import { WINDOWS } from './data'
-import type { QueueTicket } from './types'
+import type { CounterWindow, QueueTicket } from './types'
 
-export function PublicBoard({ tickets, onClose }: { tickets: QueueTicket[]; onClose: () => void }) {
-  const active = tickets.filter((ticket) => ticket.status === 'called')
+export function PublicBoard({
+  tickets,
+  windows,
+  onClose,
+}: {
+  tickets: QueueTicket[]
+  windows: CounterWindow[]
+  onClose: () => void
+}) {
   const waiting = tickets.filter((ticket) => ticket.status === 'waiting')
+  const called = tickets.filter((ticket) => ticket.status === 'called')
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-3 backdrop-blur-md">
       <section className="max-h-[94vh] w-full max-w-5xl overflow-y-auto rounded-[28px] bg-slate-50 shadow-2xl">
@@ -22,6 +30,7 @@ export function PublicBoard({ tickets, onClose }: { tickets: QueueTicket[]; onCl
             <X className="size-5" />
           </button>
         </header>
+
         <div className="p-5 sm:p-7">
           <div className="mb-4 flex items-center justify-between">
             <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
@@ -31,9 +40,10 @@ export function PublicBoard({ tickets, onClose }: { tickets: QueueTicket[]; onCl
               <Volume2 className="size-3.5 text-sky-600" /> Оповещение включено
             </span>
           </div>
+
           <div className="grid gap-3 md:grid-cols-3">
-            {WINDOWS.map((window) => {
-              const ticket = active.find((item) => item.windowNumber === window.id)
+            {windows.map((window) => {
+              const ticket = called.find((item) => item.windowNumber === window.id)
               return (
                 <div
                   key={window.id}
@@ -61,6 +71,7 @@ export function PublicBoard({ tickets, onClose }: { tickets: QueueTicket[]; onCl
               )
             })}
           </div>
+
           <div className="mt-7 rounded-2xl border border-slate-200 bg-white p-5">
             <p className="text-xs font-bold uppercase tracking-wider text-slate-500">
               Ожидают вызова · {waiting.length}

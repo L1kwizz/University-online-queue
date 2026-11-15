@@ -1,8 +1,7 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import {
-  ArrowRightLeft,
   BellRing,
   BookOpen,
   CheckCircle2,
@@ -11,28 +10,25 @@ import {
   Search,
   UserCheck,
   Users,
-  Volume2,
-  XCircle,
 } from 'lucide-react'
-import { WINDOWS } from './data'
-import type { Direction, QueueTicket } from './types'
+import type { CounterWindow, Direction, QueueTicket } from './types'
 
 export function StaffDashboard({
   tickets,
+  windows,
   onCallNext,
   onAssign,
   onComplete,
   onSkip,
-  onTransfer,
 }: {
   tickets: QueueTicket[]
-  onCallNext: (windowId: number) => void
-  onAssign: (ticketId: string, windowId: number) => void
+  windows: CounterWindow[]
+  onCallNext: (windowNumber: number) => void
+  onAssign: (ticketId: string, windowNumber: number) => void
   onComplete: (ticketId: string) => void
   onSkip: (ticketId: string) => void
-  onTransfer: (ticketId: string, direction: Direction) => void
 }) {
-  const [selectedWindow, setSelectedWindow] = useState(3)
+  const [selectedWindow, setSelectedWindow] = useState<number>(windows[0]?.id ?? 1)
   const [filter, setFilter] = useState<'all' | Direction>('all')
   const [query, setQuery] = useState('')
 
@@ -47,7 +43,7 @@ export function StaffDashboard({
   )
   const completed = tickets.filter((ticket) => ticket.status === 'completed').length
   const active = tickets.filter((ticket) => ticket.status === 'called')
-  const freeWindows = WINDOWS.filter(
+  const freeWindows = windows.filter(
     (window) => !active.some((ticket) => ticket.windowNumber === window.id),
   )
 
@@ -62,7 +58,6 @@ export function StaffDashboard({
             <h2 className="mt-2 text-2xl font-extrabold tracking-tight sm:text-3xl">
               Управление потоком студентов
             </h2>
-            <p className="mt-2 text-xs text-slate-500">Сегодня, 18 мая · Деканат открыт до 18:00</p>
           </div>
           <div className="grid grid-cols-3 gap-2">
             {[
@@ -80,7 +75,7 @@ export function StaffDashboard({
       </section>
 
       <section className="grid gap-4 lg:grid-cols-3">
-        {WINDOWS.map((window) => {
+        {windows.map((window) => {
           const current = active.find((ticket) => ticket.windowNumber === window.id)
           const isSelected = selectedWindow === window.id
           return (
@@ -96,9 +91,7 @@ export function StaffDashboard({
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span
-                    className={`size-2.5 rounded-full ${
-                      current ? 'bg-amber-400' : 'bg-emerald-500'
-                    }`}
+                    className={`size-2.5 rounded-full ${current ? 'bg-amber-400' : 'bg-emerald-500'}`}
                   />
                   <p className="text-sm font-extrabold">{window.name}</p>
                 </div>
@@ -146,15 +139,6 @@ export function StaffDashboard({
                       Не явился
                     </button>
                   </div>
-                  <button
-                    onClick={(event) => {
-                      event.stopPropagation()
-                      onTransfer(current.id, current.direction === 'tech' ? 'hum' : 'tech')
-                    }}
-                    className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-slate-100 px-3 py-2.5 text-[10px] font-bold text-slate-600"
-                  >
-                    <ArrowRightLeft className="size-3.5" /> Сменить сектор
-                  </button>
                 </div>
               ) : (
                 <div className="mt-5 rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 p-5 text-center">
@@ -192,25 +176,23 @@ export function StaffDashboard({
           </div>
           <div className="flex flex-wrap gap-2">
             {[
-              ['all', 'Все', Users],
-              ['tech', 'Техникалық', Cpu],
-              ['hum', 'Гуманитарлық', BookOpen],
-            ].map(([value, label, Icon]) => {
-              const FilterIcon = Icon as typeof Users
-              return (
-                <button
-                  key={String(value)}
-                  onClick={() => setFilter(value as 'all' | Direction)}
-                  className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-[10px] font-bold ${
-                    filter === value ? 'bg-[#0F172A] text-white' : 'bg-slate-100 text-slate-600'
-                  }`}
-                >
-                  <FilterIcon className="size-3.5" /> {String(label)}
-                </button>
-              )
-            })}
+              { value: 'all' as const, label: 'Все', icon: Users },
+              { value: 'tech' as const, label: 'Техникалық', icon: Cpu },
+              { value: 'hum' as const, label: 'Гуманитарлық', icon: BookOpen },
+            ].map(({ value, label, icon: FilterIcon }) => (
+              <button
+                key={value}
+                onClick={() => setFilter(value)}
+                className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-[10px] font-bold ${
+                  filter === value ? 'bg-[#0F172A] text-white' : 'bg-slate-100 text-slate-600'
+                }`}
+              >
+                <FilterIcon className="size-3.5" /> {label}
+              </button>
+            ))}
           </div>
         </div>
+
         <div className="p-5 sm:p-6">
           <div className="relative mb-4">
             <Search className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
@@ -221,6 +203,7 @@ export function StaffDashboard({
               className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-xs outline-none focus:border-slate-900"
             />
           </div>
+
           {waiting.length ? (
             <div className="space-y-2">
               {waiting.map((ticket, index) => (

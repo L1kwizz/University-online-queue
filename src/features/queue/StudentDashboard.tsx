@@ -1,14 +1,11 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import {
   AlertCircle,
   ArrowRight,
-  BookOpen,
   CalendarDays,
-  CheckCircle2,
   Clock3,
-  Cpu,
   FileText,
   GraduationCap,
   MapPin,
@@ -17,8 +14,8 @@ import {
   Ticket,
   X,
 } from 'lucide-react'
-import { PURPOSES } from './data'
-import type { Direction, QueueTicket, User } from './types'
+import { PURPOSES } from './constants'
+import type { QueueTicket, User } from './types'
 
 export function StudentDashboard({
   user,
@@ -28,25 +25,29 @@ export function StudentDashboard({
 }: {
   user: User
   tickets: QueueTicket[]
-  onCreate: (direction: Direction, purpose: string) => void
+  onCreate: (purpose: string) => void
   onCancel: (id: string) => void
 }) {
-  const [direction, setDirection] = useState<Direction>('tech')
-  const [purpose, setPurpose] = useState(PURPOSES[0])
+  const [purpose, setPurpose] = useState<string>(PURPOSES[0])
   const [showQr, setShowQr] = useState(false)
+
+  const isTech = user.departmentCode === 'tech'
+  const deptLabel = isTech ? 'Технический деканат' : 'Гуманитарный деканат'
+  const building = isTech ? 'Корпус A' : 'Корпус B'
+  const floor = isTech ? '1 этаж' : '2 этаж'
 
   const myTicket = [...tickets]
     .reverse()
     .find(
       (ticket) =>
-        ticket.studentEmail === user.email &&
+        ticket.studentId === user.id &&
         !['completed', 'cancelled', 'skipped'].includes(ticket.status),
     )
-  const waiting = tickets.filter((ticket) => ticket.status === 'waiting')
+  const waiting = tickets.filter(
+    (ticket) => ticket.status === 'waiting' && ticket.direction === user.departmentCode,
+  )
   const position = myTicket
-    ? waiting
-        .filter((ticket) => ticket.direction === myTicket.direction)
-        .findIndex((ticket) => ticket.id === myTicket.id) + 1
+    ? waiting.findIndex((ticket) => ticket.id === myTicket.id) + 1
     : 0
 
   return (
@@ -66,20 +67,15 @@ export function StudentDashboard({
               очередь.
             </p>
           </div>
-          <div className="grid grid-cols-3 gap-2 sm:gap-3">
-            {[
-              ['3 курс', 'Курс'],
-              ['ИС-23-2', 'Группа'],
-              ['6 семестр', 'Период'],
-            ].map(([value, label]) => (
-              <div
-                key={label}
-                className="min-w-24 rounded-2xl border border-white/10 bg-white/[.07] p-3 text-center backdrop-blur"
-              >
-                <p className="text-sm font-extrabold text-white">{value}</p>
-                <p className="mt-1 text-[10px] text-slate-400">{label}</p>
-              </div>
-            ))}
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
+            <div className="min-w-24 rounded-2xl border border-white/10 bg-white/[.07] p-3 text-center backdrop-blur">
+              <p className="text-sm font-extrabold text-white">{user.subtitle}</p>
+              <p className="mt-1 text-[10px] text-slate-400">Группа и курс</p>
+            </div>
+            <div className="min-w-24 rounded-2xl border border-white/10 bg-white/[.07] p-3 text-center backdrop-blur">
+              <p className="text-sm font-extrabold text-white">{deptLabel}</p>
+              <p className="mt-1 text-[10px] text-slate-400">Ваш деканат</p>
+            </div>
           </div>
         </div>
       </section>
@@ -98,24 +94,11 @@ export function StudentDashboard({
             </span>
           </div>
 
-          <div className="mt-6">
-            <p className="mb-3 text-xs font-bold text-slate-700">Направление обучения</p>
-            <div className="grid grid-cols-2 gap-3">
-              <DirectionCard
-                active={direction === 'tech'}
-                title="Техникалық"
-                caption="IT · Инженерия"
-                icon={<Cpu className="size-4" />}
-                onClick={() => setDirection('tech')}
-              />
-              <DirectionCard
-                active={direction === 'hum'}
-                title="Гуманитарлық"
-                caption="Право · Языки"
-                icon={<BookOpen className="size-4" />}
-                onClick={() => setDirection('hum')}
-              />
-            </div>
+          <div className="mt-6 rounded-2xl border border-sky-500 bg-sky-50 p-4">
+            <p className="text-xs font-extrabold text-slate-900">{deptLabel}</p>
+            <p className="mt-0.5 text-[10px] text-slate-500">
+              {isTech ? 'IT · Инженерия' : 'Право · Языки'}
+            </p>
           </div>
 
           <label className="mt-5 block">
@@ -128,7 +111,9 @@ export function StudentDashboard({
                 className="h-12 w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-xs font-semibold outline-none focus:border-slate-900"
               >
                 {PURPOSES.map((item) => (
-                  <option key={item}>{item}</option>
+                  <option key={item} value={item}>
+                    {item}
+                  </option>
                 ))}
               </select>
             </span>
@@ -145,14 +130,14 @@ export function StudentDashboard({
             <div className="flex items-center gap-2">
               <MapPin className="size-4 text-indigo-600" />
               <div>
-                <p className="text-xs font-bold">Корпус A</p>
-                <p className="text-[10px] text-slate-500">1 этаж</p>
+                <p className="text-xs font-bold">{building}</p>
+                <p className="text-[10px] text-slate-500">{floor}</p>
               </div>
             </div>
           </div>
 
           <button
-            onClick={() => onCreate(direction, purpose)}
+            onClick={() => onCreate(purpose)}
             disabled={Boolean(myTicket)}
             className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#0F172A] text-sm font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
           >
@@ -189,11 +174,7 @@ export function StudentDashboard({
                     <p className="mt-2 font-mono text-6xl font-black tracking-wider">
                       {myTicket.ticketNumber}
                     </p>
-                    <p className="mt-2 text-xs text-white/70">
-                      {myTicket.direction === 'tech'
-                        ? 'Техническое направление'
-                        : 'Гуманитарное направление'}
-                    </p>
+                    <p className="mt-2 text-xs text-white/70">{deptLabel}</p>
                   </div>
                   <button
                     onClick={() => setShowQr(true)}
@@ -251,17 +232,9 @@ export function StudentDashboard({
               </div>
               <h3 className="mt-5 text-xl font-extrabold">Здесь появится ваш талон</h3>
               <p className="mt-2 max-w-sm text-xs leading-5 text-slate-500">
-                Выберите направление и цель обращения. Позиция в очереди будет обновляться
+                Выберите цель обращения и получите талон. Позиция в очереди будет обновляться
                 автоматически.
               </p>
-              <div className="mt-7 grid w-full max-w-lg grid-cols-3 gap-2">
-                {['Выберите услугу', 'Получите номер', 'Ждите уведомление'].map((item, index) => (
-                  <div key={item} className="rounded-xl bg-slate-50 p-3">
-                    <p className="text-xs font-black text-sky-600">0{index + 1}</p>
-                    <p className="mt-1 text-[10px] font-semibold text-slate-600">{item}</p>
-                  </div>
-                ))}
-              </div>
             </div>
           )}
         </section>
@@ -271,7 +244,6 @@ export function StudentDashboard({
         {[
           [GraduationCap, 'Учебный календарь', 'Регистрация на летний семестр до 24 мая', '7 дней'],
           [FileText, 'Мои документы', 'Транскрипт за весенний семестр готов', 'Готово'],
-          [CheckCircle2, 'Статус обучения', 'Академических задолженностей нет', 'В норме'],
         ].map(([Icon, title, caption, badge]) => {
           const CardIcon = Icon as typeof GraduationCap
           return (
@@ -310,41 +282,6 @@ export function StudentDashboard({
         </div>
       )}
     </div>
-  )
-}
-
-function DirectionCard({
-  active,
-  title,
-  caption,
-  icon,
-  onClick,
-}: {
-  active: boolean
-  title: string
-  caption: string
-  icon: React.ReactNode
-  onClick: () => void
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`rounded-2xl border p-4 text-left transition ${
-        active
-          ? 'border-sky-500 bg-sky-50 ring-4 ring-sky-500/10'
-          : 'border-slate-200 bg-slate-50 hover:border-slate-300'
-      }`}
-    >
-      <span
-        className={`mb-3 flex size-8 items-center justify-center rounded-lg ${
-          active ? 'bg-sky-600 text-white' : 'bg-slate-200 text-slate-600'
-        }`}
-      >
-        {icon}
-      </span>
-      <span className="block text-xs font-extrabold">{title}</span>
-      <span className="mt-0.5 block text-[10px] text-slate-500">{caption}</span>
-    </button>
   )
 }
 
