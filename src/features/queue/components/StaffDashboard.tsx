@@ -11,7 +11,7 @@ import {
   UserCheck,
   Users,
 } from 'lucide-react'
-import type { CounterWindow, Direction, QueueTicket } from './types'
+import type { CounterWindow, Direction, QueueTicket } from '../types'
 
 export function StaffDashboard({
   tickets,

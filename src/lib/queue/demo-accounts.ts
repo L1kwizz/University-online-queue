@@ -1,0 +1,48 @@
+﻿import 'server-only'
+
+export const DEMO_ACCOUNTS = [
+  {
+    id: 'student-tech',
+    email: 'student.tech@university.kz',
+    password: 'Tech-Student-2026',
+    name: 'Темирлан Оспанов',
+    role: 'student',
+    departmentCode: 'tech',
+    subtitle: 'ИС-23-2 · 3 курс',
+    initials: 'ТО',
+    label: 'Студент · Технический',
+  },
+  {
+    id: 'student-hum',
+    email: 'student.hum@university.kz',
+    password: 'Hum-Student-2026',
+    name: 'Аружан Серикова',
+    role: 'student',
+    departmentCode: 'hum',
+    subtitle: 'Право-23-1 · 2 курс',
+    initials: 'АС',
+    label: 'Студент · Гуманитарный',
+  },
+  {
+    id: 'staff-tech',
+    email: 'staff.tech@university.kz',
+    password: 'Tech-Staff-2026',
+    name: 'Айгүл Ержанова',
+    role: 'staff',
+    departmentCode: 'tech',
+    subtitle: 'Главный специалист деканата ИТ',
+    initials: 'АЕ',
+    label: 'Деканат · Технический',
+  },
+  {
+    id: 'staff-hum',
+    email: 'staff.hum@university.kz',
+    password: 'Hum-Staff-2026',
+    name: 'Газиза Ахметова',
+    role: 'staff',
+    departmentCode: 'hum',
+    subtitle: 'Специалист деканата гуманитарных направлений',
+    initials: 'ГА',
+    label: 'Деканат · Гуманитарный',
+  },
+] as const

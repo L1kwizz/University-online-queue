@@ -1,7 +1,7 @@
-import type { Access, AccessResult, CollectionConfig } from 'payload'
-
+﻿import type { Access, AccessResult, CollectionConfig } from 'payload'
+import { idOf } from '@/lib/payload/helpers'
 const isPayloadAdmin: Access = ({ req }) => (req.user as any)?.collection === 'admins'
-const idOf = (v: any) => (v && typeof v === 'object' ? v.id : v)
+
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -27,8 +27,8 @@ export const Users: CollectionConfig = {
       type: 'select',
       required: true,
       options: [
-        { label: 'Студент', value: 'student' },
-        { label: 'Сотрудник деканата', value: 'staff' },
+        { label: 'РЎС‚СѓРґРµРЅС‚', value: 'student' },
+        { label: 'РЎРѕС‚СЂСѓРґРЅРёРє РґРµРєР°РЅР°С‚Р°', value: 'staff' },
       ],
     },
     { name: 'department', type: 'relationship', relationTo: 'departments' as any, required: true },

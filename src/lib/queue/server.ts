@@ -1,6 +1,8 @@
-import { cookies } from 'next/headers'
+﻿import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { getPayloadClient } from '@/lib/payload'
+import { idOf, startOfToday } from '@/lib/payload/helpers'
+export { idOf, startOfToday }
 
 export const SESSION_COOKIE = 'queue-session'
 
@@ -8,25 +10,16 @@ export const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms))
 export const randomBetween = (min: number, max: number) =>
   min + Math.floor(Math.random() * (max - min + 1))
 
-export const idOf = (v: unknown): string =>
-  v && typeof v === 'object' ? String((v as { id: unknown }).id) : String(v ?? '')
-
 export const json = (body: unknown, status = 200) => NextResponse.json(body, { status })
-export const unauthorized = () => json({ error: 'Требуется вход' }, 401)
+export const unauthorized = () => json({ error: 'РўСЂРµР±СѓРµС‚СЃСЏ РІС…РѕРґ' }, 401)
 
 export function errorResponse(e: unknown) {
   const status = typeof (e as any)?.status === 'number' ? (e as any).status : 500
-  const message = status < 500 ? (e as Error).message : 'Внутренняя ошибка сервера'
+  const message = status < 500 ? (e as Error).message : 'Р’РЅСѓС‚СЂРµРЅРЅСЏСЏ РѕС€РёР±РєР° СЃРµСЂРІРµСЂР°'
   return json({ error: message }, status)
 }
 
-export const startOfToday = () => {
-  const d = new Date()
-  d.setHours(0, 0, 0, 0)
-  return d.toISOString()
-}
-
-/** Пользователь из cookie `queue-session` или null. */
+/** РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ РёР· cookie `queue-session` РёР»Рё null. */
 export async function getSessionUser(): Promise<any | null> {
   const token = (await cookies()).get(SESSION_COOKIE)?.value
   if (!token) return null
@@ -79,4 +72,18 @@ export function toTicketDto(
     status: t.status,
     windowNumber: t.counter ? counterNumbers.get(idOf(t.counter)) : undefined,
   }
+}
+export async function setSessionCookie(result: {
+  token: string
+  exp?: number
+}) {
+  const store = await cookies()
+
+  store.set(SESSION_COOKIE, result.token, {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    path: '/',
+    expires: result.exp ? new Date(result.exp * 1000) : undefined,
+  })
 }

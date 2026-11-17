@@ -11,7 +11,7 @@ import {
   Volume2,
   VolumeX,
 } from 'lucide-react'
-import type { User } from './types'
+import type { User } from '../types'
 
 export function AppHeader({
   user,

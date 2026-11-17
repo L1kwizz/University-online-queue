@@ -1,7 +1,7 @@
 'use client'
 
 import { Monitor, Volume2, X } from 'lucide-react'
-import type { CounterWindow, QueueTicket } from './types'
+import type { CounterWindow, QueueTicket } from '../types'
 
 export function PublicBoard({
   tickets,

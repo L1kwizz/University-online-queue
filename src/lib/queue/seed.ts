@@ -1,8 +1,5 @@
-import { COUNTERS, DEMO_ACCOUNTS, DEPARTMENTS } from '@/features/queue/constants'
-
-const DEMO_PASSWORDS: Record<string, string> = Object.fromEntries(
-  DEMO_ACCOUNTS.map((a) => [a.email, a.password]),
-)
+﻿import { COUNTERS, DEPARTMENTS } from '@/lib/queue/config'
+import { DEMO_ACCOUNTS } from './demo-accounts'
 
 export async function seedQueueDemo(payload: any) {
   const departmentIds: Record<string, any> = {}
@@ -15,7 +12,9 @@ export async function seedQueueDemo(payload: any) {
       depth: 0,
       overrideAccess: true,
     })
+
     let doc = found.docs[0]
+
     if (!doc) {
       doc = await payload.create({
         collection: 'departments',
@@ -23,10 +22,11 @@ export async function seedQueueDemo(payload: any) {
         overrideAccess: true,
       })
     }
+
     if (!doc?.id) throw new Error(`Отдел ${dept.code} не создан`)
+
     departmentIds[dept.code] = doc.id
   }
-  console.log('SEED departmentIds:', departmentIds)
 
   for (const [code, windows] of Object.entries(COUNTERS)) {
     for (const w of windows) {
@@ -37,6 +37,7 @@ export async function seedQueueDemo(payload: any) {
         depth: 0,
         overrideAccess: true,
       })
+
       if (!exists.docs[0]) {
         await payload.create({
           collection: 'counters',
@@ -61,12 +62,14 @@ export async function seedQueueDemo(payload: any) {
       depth: 0,
       overrideAccess: true,
     })
+
     if (exists.docs[0]) continue
+
     await payload.create({
       collection: 'users',
       data: {
         email: acc.email,
-        password: DEMO_PASSWORDS[acc.email],
+        password: acc.password,
         name: acc.name,
         role: acc.role,
         subtitle: acc.subtitle,
