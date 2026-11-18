@@ -1,4 +1,4 @@
-﻿import type { Access, AccessResult, CollectionConfig } from 'payload'
+import type { Access, AccessResult, CollectionConfig } from 'payload'
 import { idOf } from '@/lib/payload/helpers'
 const isPayloadAdmin: Access = ({ req }) => (req.user as any)?.collection === 'admins'
 
@@ -25,8 +25,8 @@ export const Counters: CollectionConfig = {
       type: 'select',
       required: true,
       options: [
-        { label: 'РўРµС…РЅРёС‡РµСЃРєРёР№', value: 'tech' },
-        { label: 'Р“СѓРјР°РЅРёС‚Р°СЂРЅС‹Р№', value: 'hum' },
+        { label: 'Технический', value: 'tech' },
+        { label: 'Гуманитарный', value: 'hum' },
       ],
     },
     { name: 'department', type: 'relationship', relationTo: 'departments', required: true },

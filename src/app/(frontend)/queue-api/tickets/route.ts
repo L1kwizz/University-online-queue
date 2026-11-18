@@ -1,4 +1,4 @@
-﻿import { getPayloadClient } from '@/lib/payload'
+import { getPayloadClient } from '@/lib/payload'
 import {
   errorResponse,
   getSessionUser,
@@ -60,7 +60,7 @@ export async function POST(request: Request) {
 
   const body = await request.json().catch(() => null)
   if (!(PURPOSES as readonly string[]).includes(body?.purpose)) {
-    return json({ error: 'РќРµРёР·РІРµСЃС‚РЅР°СЏ С†РµР»СЊ РѕР±СЂР°С‰РµРЅРёСЏ' }, 400)
+    return json({ error: 'Неизвестная цель обращения' }, 400)
   }
 
   try {

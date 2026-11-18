@@ -1,4 +1,4 @@
-﻿
+
 import type { AccessResult, CollectionConfig } from 'payload'
 import { APIError } from 'payload'
 import { PURPOSES, TICKET_STATUSES } from '@/lib/queue/config'
@@ -62,6 +62,7 @@ export const QueueTickets: CollectionConfig = {
           where: {
             student: { equals: u.id },
             status: { in: ['waiting', 'called'] },
+            createdAt: { greater_than: startOfToday() },
           },
         })
 

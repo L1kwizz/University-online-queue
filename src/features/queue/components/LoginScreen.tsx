@@ -1,4 +1,4 @@
-﻿
+
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -23,9 +23,9 @@ import { DEMO_ACCOUNTS } from '../demo-accounts'
 import type { User } from '../types'
 
 const LOADING_STEPS = [
-  'РџСЂРѕРІРµСЂСЏРµРј СѓС‡С‘С‚РЅСѓСЋ Р·Р°РїРёСЃСЊвЂ¦',
-  'Р—Р°РіСЂСѓР¶Р°РµРј РїСЂРѕС„РёР»СЊ РґРµРєР°РЅР°С‚Р°вЂ¦',
-  'РџРѕРґРіРѕС‚Р°РІР»РёРІР°РµРј РѕС‡РµСЂРµРґСЊвЂ¦',
+  'Проверяем учётную запись…',
+  'Загружаем профиль деканата…',
+  'Подготавливаем очередь…',
 ]
 
 export function LoginScreen({
@@ -41,7 +41,7 @@ export function LoginScreen({
   const [loading, setLoading] = useState(false)
   const [loadingStep, setLoadingStep] = useState(0)
 
-  // РђРЅРёРјР°С†РёСЏ СЌС‚Р°РїРѕРІ Р·Р°РіСЂСѓР·РєРё
+  // Анимация этапов загрузки
   useEffect(() => {
     if (!loading) return
 
@@ -52,7 +52,7 @@ export function LoginScreen({
     return () => window.clearInterval(timer)
   }, [loading])
 
-  // РћР±С‹С‡РЅС‹Р№ РІС…РѕРґ РїРѕ РїРѕС‡С‚Рµ Рё РїР°СЂРѕР»СЋ
+  // Обычный вход по почте и паролю
   const signIn = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
@@ -73,13 +73,13 @@ export function LoginScreen({
 
       onLogin(user)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'РћС€РёР±РєР° РІС…РѕРґР°')
+      setError(e instanceof Error ? e.message : 'Ошибка входа')
     } finally {
       setLoading(false)
     }
   }
 
-  // РџСЂСЏРјРѕР№ РґРµРјРѕ-РІС…РѕРґ С‡РµСЂРµР· СЃРµСЂРІРµСЂ
+  // Прямой демо-вход через сервер
   const chooseDemo = async (accountId: string) => {
     if (loading) return
 
@@ -97,19 +97,19 @@ export function LoginScreen({
 
       onLogin(user)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'РћС€РёР±РєР° РґРµРјРѕ-РІС…РѕРґР°')
+      setError(e instanceof Error ? e.message : 'Ошибка демо-входа')
     } finally {
       setLoading(false)
     }
   }
 
-  // РџРµСЂРµС…РѕРґ Рє СЃР±СЂРѕСЃСѓ РїР°СЂРѕР»СЏ
+  // Переход к сбросу пароля
   const openReset = () => {
     setError('')
     setView('reset')
   }
 
-  // Р’РѕР·РІСЂР°С‚ Рє С„РѕСЂРјРµ РІС…РѕРґР°
+  // Возврат к форме входа
   const backToLogin = () => {
     setError('')
     setView('login')
@@ -123,7 +123,7 @@ export function LoginScreen({
 
       <section className="relative grid w-full max-w-5xl overflow-hidden rounded-[32px] border border-white bg-white shadow-[0_30px_90px_rgba(15,23,42,.14)] lg:grid-cols-[1.05fr_.95fr]">
 
-        {/* Р›РµРІР°СЏ РёРЅС„РѕСЂРјР°С†РёРѕРЅРЅР°СЏ РїР°РЅРµР»СЊ */}
+        {/* Левая информационная панель */}
         <div className="relative hidden min-h-[650px] overflow-hidden bg-[#0F172A] p-10 text-white lg:flex lg:flex-col lg:justify-between">
           <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full bg-sky-500/15 blur-2xl" />
 
@@ -140,22 +140,22 @@ export function LoginScreen({
                   University Hub
                 </p>
                 <p className="text-xs text-slate-400">
-                  Р”РµРєР°РЅР°С‚ В· Р­Р»РµРєС‚СЂРѕРЅРЅР°СЏ РѕС‡РµСЂРµРґСЊ
+                  Деканат · Электронная очередь
                 </p>
               </div>
             </div>
 
             <span className="inline-flex items-center gap-2 rounded-full border border-sky-400/20 bg-sky-400/10 px-3 py-1.5 text-xs font-bold text-sky-300">
               <ShieldCheck className="size-3.5" />
-              Р•РґРёРЅРѕРµ Р°РєР°РґРµРјРёС‡РµСЃРєРѕРµ РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІРѕ
+              Единое академическое пространство
             </span>
 
             <h1 className="mt-6 max-w-md text-4xl font-extrabold leading-[1.12] tracking-tight">
-              Р’СЃРµ РІРѕРїСЂРѕСЃС‹ РґРµРєР°РЅР°С‚Р° вЂ” Р±РµР· РѕР¶РёРґР°РЅРёСЏ РІ РєРѕСЂРёРґРѕСЂРµ
+              Все вопросы деканата — без ожидания в коридоре
             </h1>
 
             <p className="mt-5 max-w-md text-sm leading-6 text-slate-300">
-              РџРѕР»СѓС‡Р°Р№С‚Рµ С†РёС„СЂРѕРІРѕР№ С‚Р°Р»РѕРЅ, СЃР»РµРґРёС‚Рµ Р·Р° РѕС‡РµСЂРµРґСЊСЋ Рё РїСЂРёС…РѕРґРёС‚Рµ Рє РѕРєРЅСѓ С‚РѕС‡РЅРѕ РІРѕРІСЂРµРјСЏ.
+              Получайте цифровой талон, следите за очередью и приходите к окну точно вовремя.
             </p>
           </div>
 
@@ -164,11 +164,11 @@ export function LoginScreen({
               <GraduationCap className="mb-4 size-5 text-sky-400" />
 
               <p className="text-sm font-bold">
-                Р”Р»СЏ СЃС‚СѓРґРµРЅС‚РѕРІ
+                Для студентов
               </p>
 
               <p className="mt-1 text-xs text-slate-400">
-                РўР°Р»РѕРЅ Рё СѓРІРµРґРѕРјР»РµРЅРёСЏ
+                Талон и уведомления
               </p>
             </div>
 
@@ -176,22 +176,22 @@ export function LoginScreen({
               <Users className="mb-4 size-5 text-indigo-400" />
 
               <p className="text-sm font-bold">
-                Р”Р»СЏ СЃРѕС‚СЂСѓРґРЅРёРєРѕРІ
+                Для сотрудников
               </p>
 
               <p className="mt-1 text-xs text-slate-400">
-                РЈРїСЂР°РІР»РµРЅРёРµ РїРѕС‚РѕРєРѕРј
+                Управление потоком
               </p>
             </div>
           </div>
         </div>
 
-        {/* РџСЂР°РІР°СЏ РїР°РЅРµР»СЊ */}
+        {/* Правая панель */}
         <div className="flex min-h-[650px] flex-col justify-center p-7 sm:p-12">
 
           {view === 'login' ? (
             <>
-              {/* РњРѕР±РёР»СЊРЅС‹Р№ Р»РѕРіРѕС‚РёРї */}
+              {/* Мобильный логотип */}
               <div className="mb-8 lg:hidden">
                 <div className="flex items-center gap-3">
                   <div className="flex size-11 items-center justify-center rounded-xl bg-[#0F172A]">
@@ -204,26 +204,26 @@ export function LoginScreen({
                 </div>
               </div>
 
-              {/* Р—Р°РіРѕР»РѕРІРѕРє */}
+              {/* Заголовок */}
               <div>
                 <p className="text-xs font-bold uppercase tracking-[.18em] text-sky-600">
-                  Р”РѕР±СЂРѕ РїРѕР¶Р°Р»РѕРІР°С‚СЊ
+                  Добро пожаловать
                 </p>
 
                 <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-[#0F172A]">
-                  Р’С…РѕРґ РІ СЃРёСЃС‚РµРјСѓ
+                  Вход в систему
                 </h2>
 
                 <p className="mt-2 text-sm text-slate-500">
-                  РСЃРїРѕР»СЊР·СѓР№С‚Рµ РєРѕСЂРїРѕСЂР°С‚РёРІРЅСѓСЋ РїРѕС‡С‚Сѓ СѓРЅРёРІРµСЂСЃРёС‚РµС‚Р°.
+                  Используйте корпоративную почту университета.
                 </p>
               </div>
 
-              {/* Р¤РѕСЂРјР° РѕР±С‹С‡РЅРѕРіРѕ РІС…РѕРґР° */}
+              {/* Форма обычного входа */}
               <form className="mt-8 space-y-5" onSubmit={signIn}>
                 <label className="block">
                   <span className="mb-2 block text-xs font-bold text-slate-700">
-                    РџРѕС‡С‚Р°
+                    Почта
                   </span>
 
                   <span className="relative block">
@@ -243,7 +243,7 @@ export function LoginScreen({
 
                 <label className="block">
                   <span className="mb-2 block text-xs font-bold text-slate-700">
-                    РџР°СЂРѕР»СЊ
+                    Пароль
                   </span>
 
                   <span className="relative block">
@@ -255,7 +255,7 @@ export function LoginScreen({
                       value={password}
                       disabled={loading}
                       onChange={(event) => setPassword(event.target.value)}
-                      placeholder="Р’РІРµРґРёС‚Рµ РїР°СЂРѕР»СЊ"
+                      placeholder="Введите пароль"
                       className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-12 text-sm font-medium outline-none transition focus:border-slate-900 focus:bg-white focus:ring-4 focus:ring-slate-900/5 disabled:opacity-60"
                     />
 
@@ -263,7 +263,7 @@ export function LoginScreen({
                       type="button"
                       onClick={() => setShowPassword((value) => !value)}
                       className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
-                      aria-label={showPassword ? 'РЎРєСЂС‹С‚СЊ РїР°СЂРѕР»СЊ' : 'РџРѕРєР°Р·Р°С‚СЊ РїР°СЂРѕР»СЊ'}
+                      aria-label={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
                     >
                       {showPassword ? (
                         <EyeOff className="size-4" />
@@ -281,11 +281,11 @@ export function LoginScreen({
                     onClick={openReset}
                     className="text-xs font-bold text-sky-700 hover:text-sky-900 disabled:opacity-50"
                   >
-                    Р—Р°Р±С‹Р»Рё РїР°СЂРѕР»СЊ?
+                    Забыли пароль?
                   </button>
                 </div>
 
-                {/* РћС€РёР±РєР° РІС…РѕРґР° */}
+                {/* Ошибка входа */}
                 {error && (
                   <p
                     role="alert"
@@ -295,7 +295,7 @@ export function LoginScreen({
                   </p>
                 )}
 
-                {/* РљРЅРѕРїРєР° РІС…РѕРґР° */}
+                {/* Кнопка входа */}
                 <button
                   type="submit"
                   disabled={loading}
@@ -308,17 +308,17 @@ export function LoginScreen({
                     </>
                   ) : (
                     <>
-                      Р’РѕР№С‚Рё РІ СЃРёСЃС‚РµРјСѓ
+                      Войти в систему
                       <ArrowRight className="size-4" />
                     </>
                   )}
                 </button>
               </form>
 
-              {/* Р”РµРјРѕ-РґРѕСЃС‚СѓРї */}
+              {/* Демо-доступ */}
               <div className="mt-7 border-t border-slate-100 pt-6">
                 <p className="mb-3 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                  Р”РµРјРѕ-РґРѕСЃС‚СѓРї
+                  Демо-доступ
                 </p>
 
                 <div className="grid gap-2 sm:grid-cols-2">
@@ -342,12 +342,12 @@ export function LoginScreen({
                 </div>
 
                 <p className="mt-3 text-[10px] text-slate-400">
-                  РќР°Р¶РјРёС‚Рµ РЅР° РєР°СЂС‚РѕС‡РєСѓ, С‡С‚РѕР±С‹ РІРѕР№С‚Рё РїРѕРґ РґРµРјРѕРЅСЃС‚СЂР°С†РёРѕРЅРЅРѕР№ СѓС‡С‘С‚РЅРѕР№ Р·Р°РїРёСЃСЊСЋ.
+                  Нажмите на карточку, чтобы войти под демонстрационной учётной записью.
                 </p>
               </div>
             </>
           ) : view === 'reset' ? (
-            /* РЎР±СЂРѕСЃ РїР°СЂРѕР»СЏ */
+            /* Сброс пароля */
             <div>
               <button
                 type="button"
@@ -355,7 +355,7 @@ export function LoginScreen({
                 className="mb-8 flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-slate-900"
               >
                 <ArrowLeft className="size-4" />
-                РќР°Р·Р°Рґ РєРѕ РІС…РѕРґСѓ
+                Назад ко входу
               </button>
 
               <div className="flex size-14 items-center justify-center rounded-2xl bg-sky-50 text-sky-700">
@@ -363,11 +363,11 @@ export function LoginScreen({
               </div>
 
               <h2 className="mt-6 text-3xl font-extrabold tracking-tight">
-                РЎР±СЂРѕСЃ РїР°СЂРѕР»СЏ
+                Сброс пароля
               </h2>
 
               <p className="mt-3 text-sm leading-6 text-slate-500">
-                РЈРєР°Р¶РёС‚Рµ РєРѕСЂРїРѕСЂР°С‚РёРІРЅСѓСЋ РїРѕС‡С‚Сѓ. Р’ РґРµРјРѕ-СЂРµР¶РёРјРµ РјС‹ РїРѕРєР°Р¶РµРј РїРѕРґС‚РІРµСЂР¶РґРµРЅРёРµ Р±РµР· РѕС‚РїСЂР°РІРєРё РЅР°СЃС‚РѕСЏС‰РµРіРѕ РїРёСЃСЊРјР°.
+                Укажите корпоративную почту. В демо-режиме мы покажем подтверждение без отправки настоящего письма.
               </p>
 
               <form
@@ -379,7 +379,7 @@ export function LoginScreen({
               >
                 <label className="block">
                   <span className="mb-2 block text-xs font-bold text-slate-700">
-                    РџРѕС‡С‚Р°
+                    Почта
                   </span>
 
                   <input
@@ -396,25 +396,25 @@ export function LoginScreen({
                   type="submit"
                   className="h-12 w-full rounded-xl bg-[#0F172A] text-sm font-bold text-white"
                 >
-                  РћС‚РїСЂР°РІРёС‚СЊ РёРЅСЃС‚СЂСѓРєС†РёСЋ
+                  Отправить инструкцию
                 </button>
               </form>
             </div>
           ) : (
-            /* РџРѕРґС‚РІРµСЂР¶РґРµРЅРёРµ СЃР±СЂРѕСЃР° */
+            /* Подтверждение сброса */
             <div className="text-center">
               <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
                 <CheckCircle2 className="size-8" />
               </div>
 
               <h2 className="mt-6 text-2xl font-extrabold">
-                РРЅСЃС‚СЂСѓРєС†РёСЏ РѕС‚РїСЂР°РІР»РµРЅР°
+                Инструкция отправлена
               </h2>
 
               <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-slate-500">
-                Р”РµРјРѕ-РїРёСЃСЊРјРѕ РґР»СЏ{' '}
+                Демо-письмо для{' '}
                 <strong className="text-slate-700">{email}</strong>{' '}
-                СѓСЃРїРµС€РЅРѕ СЃС‹РјРёС‚РёСЂРѕРІР°РЅРѕ.
+                успешно сымитировано.
               </p>
 
               <button
@@ -422,7 +422,7 @@ export function LoginScreen({
                 onClick={backToLogin}
                 className="mt-8 inline-flex h-11 items-center gap-2 rounded-xl bg-[#0F172A] px-6 text-sm font-bold text-white"
               >
-                Р’РµСЂРЅСѓС‚СЊСЃСЏ РєРѕ РІС…РѕРґСѓ
+                Вернуться ко входу
                 <ArrowRight className="size-4" />
               </button>
             </div>

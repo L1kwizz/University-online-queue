@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import {
@@ -31,9 +31,9 @@ export function StudentDashboard({
   const [showQr, setShowQr] = useState(false)
 
   const isTech = user.departmentCode === 'tech'
-  const deptLabel = isTech ? 'РўРµС…РЅРёС‡РµСЃРєРёР№ РґРµРєР°РЅР°С‚' : 'Р“СѓРјР°РЅРёС‚Р°СЂРЅС‹Р№ РґРµРєР°РЅР°С‚'
-  const building = isTech ? 'РљРѕСЂРїСѓСЃ A' : 'РљРѕСЂРїСѓСЃ B'
-  const floor = isTech ? '1 СЌС‚Р°Р¶' : '2 СЌС‚Р°Р¶'
+  const deptLabel = isTech ? 'Технический деканат' : 'Гуманитарный деканат'
+  const building = isTech ? 'Корпус A' : 'Корпус B'
+  const floor = isTech ? '1 этаж' : '2 этаж'
 
   const myTicket = [...tickets]
     .reverse()
@@ -59,21 +59,21 @@ export function StudentDashboard({
               <Sparkles className="size-3.5" /> Academic Services
             </span>
             <h2 className="mt-4 text-2xl font-extrabold tracking-tight sm:text-3xl">
-              РЎУ™Р»РµРј, {user.name.split(' ')[0]}!
+              Сәлем, {user.name.split(' ')[0]}!
             </h2>
             <p className="mt-2 max-w-xl text-sm leading-6 text-slate-300">
-              РџРѕРґР°Р№С‚Рµ Р·Р°СЏРІРєСѓ РѕРЅР»Р°Р№РЅ Рё Р·Р°РЅРёРјР°Р№С‚РµСЃСЊ СЃРІРѕРёРјРё РґРµР»Р°РјРё вЂ” РјС‹ СѓРІРµРґРѕРјРёРј, РєРѕРіРґР° РїРѕРґРѕР№РґС‘С‚ РІР°С€Р°
-              РѕС‡РµСЂРµРґСЊ.
+              Подайте заявку онлайн и занимайтесь своими делами — мы уведомим, когда подойдёт ваша
+              очередь.
             </p>
           </div>
           <div className="grid grid-cols-2 gap-2 sm:gap-3">
             <div className="min-w-24 rounded-2xl border border-white/10 bg-white/[.07] p-3 text-center backdrop-blur">
               <p className="text-sm font-extrabold text-white">{user.subtitle}</p>
-              <p className="mt-1 text-[10px] text-slate-400">Р“СЂСѓРїРїР° Рё РєСѓСЂСЃ</p>
+              <p className="mt-1 text-[10px] text-slate-400">Группа и курс</p>
             </div>
             <div className="min-w-24 rounded-2xl border border-white/10 bg-white/[.07] p-3 text-center backdrop-blur">
               <p className="text-sm font-extrabold text-white">{deptLabel}</p>
-              <p className="mt-1 text-[10px] text-slate-400">Р’Р°С€ РґРµРєР°РЅР°С‚</p>
+              <p className="mt-1 text-[10px] text-slate-400">Ваш деканат</p>
             </div>
           </div>
         </div>
@@ -84,9 +84,9 @@ export function StudentDashboard({
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-sky-600">
-                РќРѕРІР°СЏ Р·Р°СЏРІРєР°
+                Новая заявка
               </p>
-              <h3 className="mt-1 text-xl font-extrabold tracking-tight">Р—Р°РїРёСЃСЊ РІ РґРµРєР°РЅР°С‚</h3>
+              <h3 className="mt-1 text-xl font-extrabold tracking-tight">Запись в деканат</h3>
             </div>
             <span className="flex size-10 items-center justify-center rounded-xl bg-sky-50 text-sky-700">
               <Ticket className="size-5" />
@@ -96,12 +96,12 @@ export function StudentDashboard({
           <div className="mt-6 rounded-2xl border border-sky-500 bg-sky-50 p-4">
             <p className="text-xs font-extrabold text-slate-900">{deptLabel}</p>
             <p className="mt-0.5 text-[10px] text-slate-500">
-              {isTech ? 'IT В· РРЅР¶РµРЅРµСЂРёСЏ' : 'РџСЂР°РІРѕ В· РЇР·С‹РєРё'}
+              {isTech ? 'IT · Инженерия' : 'Право · Языки'}
             </p>
           </div>
 
           <label className="mt-5 block">
-            <span className="mb-2 block text-xs font-bold text-slate-700">Р¦РµР»СЊ РѕР±СЂР°С‰РµРЅРёСЏ</span>
+            <span className="mb-2 block text-xs font-bold text-slate-700">Цель обращения</span>
             <span className="relative block">
               <FileText className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
               <select
@@ -122,8 +122,8 @@ export function StudentDashboard({
             <div className="flex items-center gap-2">
               <Clock3 className="size-4 text-sky-600" />
               <div>
-                <p className="text-xs font-bold">~{Math.max(8, waiting.length * 4)} РјРёРЅ</p>
-                <p className="text-[10px] text-slate-500">РѕР¶РёРґР°РЅРёРµ</p>
+                <p className="text-xs font-bold">~{Math.max(8, waiting.length * 4)} мин</p>
+                <p className="text-[10px] text-slate-500">ожидание</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -140,7 +140,7 @@ export function StudentDashboard({
             disabled={Boolean(myTicket)}
             className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#0F172A] text-sm font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
           >
-            {myTicket ? 'РЈ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ Р°РєС‚РёРІРЅС‹Р№ С‚Р°Р»РѕРЅ' : 'РџРѕР»СѓС‡РёС‚СЊ СЌР»РµРєС‚СЂРѕРЅРЅС‹Р№ С‚Р°Р»РѕРЅ'}
+            {myTicket ? 'У вас уже есть активный талон' : 'Получить электронный талон'}
             {!myTicket && <ArrowRight className="size-4" />}
           </button>
         </section>
@@ -151,7 +151,7 @@ export function StudentDashboard({
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                    Р’Р°С€ С†РёС„СЂРѕРІРѕР№ С‚Р°Р»РѕРЅ
+                    Ваш цифровой талон
                   </p>
                   <p className="mt-1 text-sm font-bold text-slate-700">{myTicket.purpose}</p>
                 </div>
@@ -168,7 +168,7 @@ export function StudentDashboard({
                 <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
                   <div>
                     <p className="text-xs font-bold uppercase tracking-[.18em] text-white/60">
-                      РќРѕРјРµСЂ С‚Р°Р»РѕРЅР°
+                      Номер талона
                     </p>
                     <p className="mt-2 font-mono text-6xl font-black tracking-wider">
                       {myTicket.ticketNumber}
@@ -180,7 +180,7 @@ export function StudentDashboard({
                     className="flex size-24 flex-col items-center justify-center rounded-2xl bg-white text-slate-900"
                   >
                     <QrCode className="size-11" />
-                    <span className="mt-1 text-[9px] font-bold">РћС‚РєСЂС‹С‚СЊ QR</span>
+                    <span className="mt-1 text-[9px] font-bold">Открыть QR</span>
                   </button>
                 </div>
               </div>
@@ -192,35 +192,35 @@ export function StudentDashboard({
                   </span>
                   <div>
                     <p className="font-extrabold text-emerald-900">
-                      Р’Р°С€Р° РѕС‡РµСЂРµРґСЊ вЂ” РїСЂРѕР№РґРёС‚Рµ Рє РѕРєРЅСѓ {myTicket.windowNumber}
+                      Ваша очередь — пройдите к окну {myTicket.windowNumber}
                     </p>
-                    <p className="mt-1 text-xs text-emerald-700">РЎРѕС‚СЂСѓРґРЅРёРє СѓР¶Рµ РѕР¶РёРґР°РµС‚ РІР°СЃ.</p>
+                    <p className="mt-1 text-xs text-emerald-700">Сотрудник уже ожидает вас.</p>
                   </div>
                 </div>
               ) : (
                 <div className="mt-5 grid grid-cols-2 gap-3">
                   <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                     <p className="font-mono text-2xl font-black">#{position || 1}</p>
-                    <p className="mt-1 text-[11px] text-slate-500">РјРµСЃС‚Рѕ РІ РѕС‡РµСЂРµРґРё</p>
+                    <p className="mt-1 text-[11px] text-slate-500">место в очереди</p>
                   </div>
                   <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                     <p className="font-mono text-2xl font-black text-sky-600">
-                      ~{Math.max(4, position * 4)} РјРёРЅ
+                      ~{Math.max(4, position * 4)} мин
                     </p>
-                    <p className="mt-1 text-[11px] text-slate-500">РґРѕ РІР°С€РµРіРѕ РІС‹Р·РѕРІР°</p>
+                    <p className="mt-1 text-[11px] text-slate-500">до вашего вызова</p>
                   </div>
                 </div>
               )}
 
               <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-5">
                 <div className="flex items-center gap-2 text-xs text-slate-500">
-                  <CalendarDays className="size-4" /> РЎРµРіРѕРґРЅСЏ, {myTicket.createdAt}
+                  <CalendarDays className="size-4" /> Сегодня, {myTicket.createdAt}
                 </div>
                 <button
                   onClick={() => onCancel(myTicket.id)}
                   className="rounded-lg px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50"
                 >
-                  РћС‚РјРµРЅРёС‚СЊ Р·Р°РїРёСЃСЊ
+                  Отменить запись
                 </button>
               </div>
             </div>
@@ -229,10 +229,10 @@ export function StudentDashboard({
               <div className="flex size-20 items-center justify-center rounded-3xl bg-slate-100 text-sky-600">
                 <Ticket className="size-9" />
               </div>
-              <h3 className="mt-5 text-xl font-extrabold">Р—РґРµСЃСЊ РїРѕСЏРІРёС‚СЃСЏ РІР°С€ С‚Р°Р»РѕРЅ</h3>
+              <h3 className="mt-5 text-xl font-extrabold">Здесь появится ваш талон</h3>
               <p className="mt-2 max-w-sm text-xs leading-5 text-slate-500">
-                Р’С‹Р±РµСЂРёС‚Рµ С†РµР»СЊ РѕР±СЂР°С‰РµРЅРёСЏ Рё РїРѕР»СѓС‡РёС‚Рµ С‚Р°Р»РѕРЅ. РџРѕР·РёС†РёСЏ РІ РѕС‡РµСЂРµРґРё Р±СѓРґРµС‚ РѕР±РЅРѕРІР»СЏС‚СЊСЃСЏ
-                Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРё.
+                Выберите цель обращения и получите талон. Позиция в очереди будет обновляться
+                автоматически.
               </p>
             </div>
           )}
@@ -241,8 +241,8 @@ export function StudentDashboard({
 
       <section className="grid gap-4 md:grid-cols-3">
         {[
-          [GraduationCap, 'РЈС‡РµР±РЅС‹Р№ РєР°Р»РµРЅРґР°СЂСЊ', 'Р РµРіРёСЃС‚СЂР°С†РёСЏ РЅР° Р»РµС‚РЅРёР№ СЃРµРјРµСЃС‚СЂ РґРѕ 24 РјР°СЏ', '7 РґРЅРµР№'],
-          [FileText, 'РњРѕРё РґРѕРєСѓРјРµРЅС‚С‹', 'РўСЂР°РЅСЃРєСЂРёРїС‚ Р·Р° РІРµСЃРµРЅРЅРёР№ СЃРµРјРµСЃС‚СЂ РіРѕС‚РѕРІ', 'Р“РѕС‚РѕРІРѕ'],
+          [GraduationCap, 'Учебный календарь', 'Регистрация на летний семестр до 24 мая', '7 дней'],
+          [FileText, 'Мои документы', 'Транскрипт за весенний семестр готов', 'Готово'],
         ].map(([Icon, title, caption, badge]) => {
           const CardIcon = Icon as typeof GraduationCap
           return (
@@ -271,7 +271,7 @@ export function StudentDashboard({
             >
               <X className="size-5" />
             </button>
-            <p className="text-lg font-extrabold">QR-РєРѕРґ С‚Р°Р»РѕРЅР°</p>
+            <p className="text-lg font-extrabold">QR-код талона</p>
             <div className="mx-auto mt-6 flex size-52 items-center justify-center rounded-2xl bg-slate-50">
               <QrCode className="size-44" />
             </div>
@@ -292,7 +292,7 @@ function StatusBadge({ status }: { status: QueueTicket['status'] }) {
         called ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
       }`}
     >
-      {called ? 'Р’Р°С€Р° РѕС‡РµСЂРµРґСЊ' : 'Р’ РѕР¶РёРґР°РЅРёРё'}
+      {called ? 'Ваша очередь' : 'В ожидании'}
     </span>
   )
 }

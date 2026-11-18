@@ -1,4 +1,4 @@
-﻿import { cookies } from 'next/headers'
+import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { getPayloadClient } from '@/lib/payload'
 import { idOf, startOfToday } from '@/lib/payload/helpers'
@@ -11,15 +11,15 @@ export const randomBetween = (min: number, max: number) =>
   min + Math.floor(Math.random() * (max - min + 1))
 
 export const json = (body: unknown, status = 200) => NextResponse.json(body, { status })
-export const unauthorized = () => json({ error: 'РўСЂРµР±СѓРµС‚СЃСЏ РІС…РѕРґ' }, 401)
+export const unauthorized = () => json({ error: 'Требуется вход' }, 401)
 
 export function errorResponse(e: unknown) {
   const status = typeof (e as any)?.status === 'number' ? (e as any).status : 500
-  const message = status < 500 ? (e as Error).message : 'Р’РЅСѓС‚СЂРµРЅРЅСЏСЏ РѕС€РёР±РєР° СЃРµСЂРІРµСЂР°'
+  const message = status < 500 ? (e as Error).message : 'Внутренняя ошибка сервера'
   return json({ error: message }, status)
 }
 
-/** РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ РёР· cookie `queue-session` РёР»Рё null. */
+/** Пользователь из cookie `queue-session` или null. */
 export async function getSessionUser(): Promise<any | null> {
   const token = (await cookies()).get(SESSION_COOKIE)?.value
   if (!token) return null
